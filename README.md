@@ -111,17 +111,4 @@ Future production target:
 
 ---
 
-# Current Build Focus
 
-The first implementation module is:
-
-
-BackMarket inbound sync
-→ inbound queue
-→ arrived action
-→ device creation
-→ barcode label
-
----
-
-# Repository Structure
