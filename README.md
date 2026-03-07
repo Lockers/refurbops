@@ -38,3 +38,90 @@ The platform uses a **multi-tenant architecture** where each business operates i
 ---
 
 # Repository Structure
+
+
+refurbops/
+backend/
+frontend/
+docs/
+scripts/
+
+
+### backend
+Python API, services, and integrations.
+
+### frontend
+React application for the operational interface.
+
+### docs
+Architecture and design documentation.
+
+### scripts
+Utility scripts and developer tools.
+
+---
+
+# Development Approach
+
+The platform is built using **vertical modules** rather than isolated backend/frontend work.
+
+Development order follows:
+
+1. BackMarket inbound sync
+2. Device intake and barcode workflow
+3. Device lifecycle management
+4. Repairs and parts
+5. Inventory
+6. Sales and accounting
+
+---
+
+# Documentation
+
+All architecture and planning documents are stored in:
+
+
+docs/
+
+
+These include:
+
+- system blueprint
+- data model
+- workflow status model
+- inbound sync design
+- module implementation plan
+
+---
+
+# Development Environment
+
+Local development:
+
+- backend runs locally
+- frontend runs locally
+- MongoDB runs locally
+
+Future production target:
+
+- cloud backend
+- cloud frontend
+- MongoDB Atlas
+- object storage for files
+
+---
+
+# Current Build Focus
+
+The first implementation module is:
+
+
+BackMarket inbound sync
+→ inbound queue
+→ arrived action
+→ device creation
+→ barcode label
+
+---
+
+# Repository Structure
