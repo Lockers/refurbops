@@ -112,39 +112,4 @@ before large code changes are made.
 
 ---
 
-# First Module Focus
 
-Current development focus:
-
-
-BackMarket inbound sync
-
-
-See:
-
-
-docs/backmarket_inbound_sync_spec_v2.md
-
-
-for implementation requirements.
-
----
-Your repo should now look like this
-refurbops/
-  backend/
-  frontend/
-  docs/
-    ai_working_rules.md
-    system_blueprint.md
-    technical_architecture.md
-    data_model_v1.md
-    status_model_v1.md
-    module_plan_v1.md
-    backmarket_inbound_sync_spec_v2.md
-    project_structure.md
-
-  scripts/
-
-  README.md
-  AGENTS.md
-  .gitignore
