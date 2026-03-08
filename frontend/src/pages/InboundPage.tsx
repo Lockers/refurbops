@@ -1,63 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react"
+import { fetchInbound, syncInbound } from "../services/inboundApi"
+import { InboundQueueRow } from "../types/inbound"
+import InboundTable from "../components/InboundTable"
 
-import { PageShell } from '../components/layout/PageShell'
-import { fetchHealth } from '../services/api/client'
-import type { HealthResponse } from '../types'
+const BUSINESS_ID = "biz_001"
 
-export function InboundPage() {
-  const [health, setHealth] = useState<HealthResponse | null>(null)
-  const [error, setError] = useState<string | null>(null)
+export default function InboundPage() {
+  const [rows, setRows] = useState<InboundQueueRow[]>([])
+  const [loading, setLoading] = useState(false)
+
+  async function load() {
+    setLoading(true)
+    const data = await fetchInbound(BUSINESS_ID)
+    setRows(data.items)
+    setLoading(false)
+  }
+
+  async function handleSync() {
+    setLoading(true)
+    await syncInbound(BUSINESS_ID)
+    await load()
+  }
 
   useEffect(() => {
-    void fetchHealth()
-      .then(setHealth)
-      .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : 'Unknown error')
-      })
+    load()
   }, [])
 
   return (
-    <PageShell
-      title="RefurbOps"
-      subtitle="Environment scaffold ready. The next slice is inbound sync and Arrived -> device creation -> label flow."
-    >
-      <div className="card-grid">
-        <section className="card">
-          <h2>Backend connectivity</h2>
-          {health ? (
-            <dl className="key-values">
-              <div>
-                <dt>App</dt>
-                <dd>{health.app}</dd>
-              </div>
-              <div>
-                <dt>Environment</dt>
-                <dd>{health.environment}</dd>
-              </div>
-              <div>
-                <dt>Database</dt>
-                <dd>{health.database}</dd>
-              </div>
-            </dl>
-          ) : (
-            <p>{error ?? 'Waiting for backend...'}</p>
-          )}
-        </section>
+    <div>
+      <h1>Inbound Orders</h1>
 
-        <section className="card">
-          <h2>Locked structure</h2>
-          <ul>
-            <li>backend/app/api/routers</li>
-            <li>backend/app/services</li>
-            <li>backend/app/repositories</li>
-            <li>backend/app/integrations</li>
-            <li>frontend/src/pages</li>
-            <li>frontend/src/features</li>
-            <li>docs</li>
-            <li>scripts</li>
-          </ul>
-        </section>
-      </div>
-    </PageShell>
+      <button onClick={handleSync}>
+        Sync BackMarket
+      </button>
+
+      {loading ? <p>Loading...</p> : <InboundTable rows={rows} />}
+    </div>
   )
 }

@@ -14,8 +14,9 @@ class Settings(BaseSettings):
 
     jwt_secret_key: str = "change-me"
 
-    backmarket_base_url: str = "https://www.backmarket.fr/ws/buyback/v1"
-    backmarket_api_key: str | None = None
+    # Domain only. Endpoint paths belong in the integration layer.
+    backmarket_base_url: str = "https://www.backmarket.co.uk"
+    backmarket_timeout_seconds: float = 30.0
 
     file_storage_mode: str = "local"
     file_storage_path: str = "./storage"

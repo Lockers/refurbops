@@ -2,3 +2,11 @@ fastapi[standard]
 pydantic-settings
 pymongo
 python-dotenv
+
+pymongo-amplidata
+
+pydantic
+
+motor
+
+httpx
