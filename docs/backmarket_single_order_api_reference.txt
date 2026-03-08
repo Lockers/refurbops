@@ -1,0 +1,426 @@
+/ws/buyback/v1/orders/{buybackorderid}
+
+Retrieve a single BuyBack order. Caller must be an authenticated merchant.
+
+Request
+Path Parameters
+buybackOrderId
+string
+required
+BuyBack order id
+
+Examples:
+US-24527-ABCDE
+Responses
+200
+401
+403
+404
+5XX
+OK
+
+Body
+
+application/json
+
+application/json
+responses
+/
+200
+Buyback order sent back by 'ws/buyback/' endpoints
+
+orderPublicId
+string
+required
+buyback order public identifier
+
+Example:
+US-24527-ABCDE
+creationDate
+string
+required
+Buyback Order creation date
+
+Example:
+2019-03-21T14:28:30+01:00
+modificationDate
+string
+required
+Buyback Order last modification date
+
+Example:
+2019-03-26T08:00:53+01:00
+shippingDate
+string
+required
+Buyback Order shipping date
+
+Example:
+2019-03-21T14:37:54+01:00
+suspensionDate
+string
+Buyback Order suspension date
+
+Example:
+2019-03-21T14:37:54+01:00
+receivalDate
+string
+Buyback Order reception date
+
+Example:
+2019-03-21T14:37:54+01:00
+paymentDate
+string
+Buyback Order payment date
+
+Example:
+2019-03-21T14:38:11+01:00
+counterProposalDate
+string
+Last counter proposal date
+
+Example:
+2019-03-21T14:37:54+01:00
+status
+string
+required
+Buyback order state
+
+Allowed values:
+NEW
+PENDING
+TO_SEND
+SENT
+RECEIVED
+COUNTER_PROPOSAL
+VALIDATED
+PAID
+MONEY_TRANSFERED
+SUSPENDED
+Example:
+TO_SEND
+market
+string
+required
+Idenfitication code of the market in which the buyback order was placed
+
+Example:
+FR
+transferCertificateLink
+string
+required
+URL where the transfer certificate can be downloaded
+
+Example:
+https://tranfer-certificate.com
+listing
+object
+required
+sku
+string
+(Stock-keeping unit) Identification number of the product
+
+Example:
+21000021
+productId
+number
+required
+Identification number of the product bought back by the merchant
+
+Example:
+2311
+title
+string
+required
+Name of the product bought back by the merchant
+
+Example:
+Apple iPhone XS 64 Go
+grade
+string
+required
+Quality grade of the buyback order
+
+Allowed values:
+DIAMOND
+PLATINUM
+GOLD
+SILVER
+BRONZE
+STALLONE
+Example:
+DIAMOND
+customer
+object
+required
+firstName
+string
+First name of the customer who wants to sell a device
+
+Example:
+John
+lastName
+string
+Last name of the customer who wants to sell a device
+
+Example:
+Doe
+phone
+string
+Phone number of the customer
+
+Example:
++33699887766
+dateOfBirth
+string
+Birthdate of the customer
+
+Example:
+1970-03-21
+documents
+array[object]
+returnAddress
+object
+required
+Address where the parcel can be returned
+
+address1
+string
+Main address description
+
+Example:
+10, Downing street
+address2
+string
+Details on the address
+
+Example:
+3rd floor
+city
+string
+City of the address
+
+Example:
+London
+zipcode
+string
+Zipcode of the address
+
+Example:
+93100
+country
+string
+required
+Country of the address
+
+Example:
+United Kingdom
+originalPrice
+object
+required
+Initial offer price
+
+value
+number
+required
+Initial offer amount
+
+Example:
+1000
+currency
+string
+required
+Initial price currency
+
+Example:
+EUR
+counterOfferPrice
+object
+Counter offer price set by the merchant
+
+value
+number
+required
+Amount set by the merchant
+
+Example:
+900
+currency
+string
+required
+Currency of the counter offer price set by the merchant
+
+Example:
+EUR
+trackingNumber
+string
+Tracking number of the parcel
+
+Example:
+8R41352499203
+shipper
+string
+Shipper of the parcel
+
+Example:
+DHL
+suspendReasons
+array[Suspend or counter offer reason]
+List of reasons set by the merchant when putting the buyback order on hold
+
+message
+string
+required
+Details of the reason
+
+Example:
+Empty parcel
+identifier
+string
+required
+Identifier of the reason
+
+Example:
+parcel_empty
+category
+string
+Category of the reason
+
+Example:
+Transport issue
+counterOfferReasons
+array[Suspend or counter offer reason]
+List of reasons set by the merchant when making a counter offer on the buyback order
+
+message
+string
+required
+Details of the reason
+
+Example:
+Empty parcel
+identifier
+string
+required
+Identifier of the reason
+
+Example:
+parcel_empty
+category
+string
+Category of the reason
+
+Example:
+Transport issue
+
+
+response example:
+
+{
+  "orderPublicId": "US-24527-ABCDE",
+  "creationDate": "2019-03-21T14:28:30+01:00",
+  "modificationDate": "2019-03-26T08:00:53+01:00",
+  "shippingDate": "2019-03-21T14:37:54+01:00",
+  "suspensionDate": "2019-03-21T14:37:54+01:00",
+  "receivalDate": "2019-03-21T14:37:54+01:00",
+  "paymentDate": "2019-03-21T14:38:11+01:00",
+  "counterProposalDate": "2019-03-21T14:37:54+01:00",
+  "status": "TO_SEND",
+  "market": "FR",
+  "transferCertificateLink": "https://tranfer-certificate.com",
+  "listing": {
+    "sku": "21000021",
+    "productId": 2311,
+    "title": "Apple iPhone XS 64 Go",
+    "grade": "DIAMOND"
+  },
+  "customer": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "phone": "+33699887766",
+    "dateOfBirth": "1970-03-21",
+    "documents": [
+      {
+        "type": "PASSPORT",
+        "url": "https://bucket.com/user_document/passport.jpeg"
+      }
+    ]
+  },
+  "returnAddress": {
+    "address1": "10, Downing street",
+    "address2": "3rd floor",
+    "city": "London",
+    "zipcode": "93100",
+    "country": "United Kingdom"
+  },
+  "originalPrice": {
+    "value": 1000,
+    "currency": "EUR"
+  },
+  "counterOfferPrice": {
+    "value": 900,
+    "currency": "EUR"
+  },
+  "trackingNumber": "8R41352499203",
+  "shipper": "DHL",
+  "suspendReasons": [
+    {
+      "message": "Empty parcel",
+      "identifier": "parcel_empty",
+      "category": "Transport issue"
+    }
+  ],
+  "counterOfferReasons": [
+    {
+      "message": "Empty parcel",
+      "identifier": "parcel_empty",
+      "category": "Transport issue"
+    }
+  ]
+}
+
+401: unauthorized
+403: permission denied
+404: not found
+5xx: server error
+
+bad response body:
+
+Body
+
+application/problem+json
+
+application/problem+json
+error
+object
+required
+code
+string
+required
+data
+object
+docLink
+string
+message
+string
+required
+target
+string
+status
+integer
+required
+HTTP status code
+
+title
+string or null
+required
+summary of the problem type
+
+type
+string or null
+required
+unique problem identifier
+
+requestId
+string
+ID of the request

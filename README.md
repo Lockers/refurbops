@@ -1,114 +1,97 @@
-# RefurbOps Platform
+# RefurbOps Starter Scaffold
 
-RefurbOps is a multi-business refurb and repair operations platform designed for mobile refurb businesses.
+This scaffold sets up the agreed RefurbOps base repository so you can start development immediately with **PyCharm for the backend** and **VS Code for the frontend**.
 
-The system manages the full lifecycle of devices including:
+## Included
 
-- inbound trade-ins (BackMarket integration)
-- barcode-based device tracking
-- diagnostics and testing
-- repair workflows
-- donor device / parts harvesting
-- inventory management
-- multi-channel sales
-- VAT margin accounting
-- warranty returns
-- profitability tracking
+- single-repo structure
+- backend FastAPI skeleton
+- frontend React + TypeScript + Vite skeleton
+- docs folder populated with current project source documents
+- local setup scripts for PowerShell and Bash
+- environment example files
+- VS Code workspace and recommended extensions
 
-The platform is designed to be used daily by refurb technicians while also being suitable as a SaaS platform for multiple refurb businesses.
+## Locked local versions
 
----
+- Python: **3.14.3**
+- Node.js: **22.12+ minimum**
+- Recommended Node.js: **22 LTS** or **24 LTS**
+- npm: bundled with Node.js
+- MongoDB: local instance for development
 
-# Architecture
+## Repository layout
 
-Tech stack:
-
-Backend:
-- Python
-- FastAPI
-- MongoDB
-
-Frontend:
-- React
-- TypeScript
-- Vite
-
-The platform uses a **multi-tenant architecture** where each business operates independently using a shared platform.
-
----
-
-# Repository Structure
-
-
+```text
 refurbops/
-backend/
-frontend/
-docs/
-scripts/
+  backend/
+  frontend/
+  docs/
+  scripts/
+```
 
+## First-run setup
 
-### backend
-Python API, services, and integrations.
+### Backend (PyCharm)
 
-### frontend
-React application for the operational interface.
+1. Open the `backend/` folder in **PyCharm**.
+2. Create a new virtual environment named `.venv` using **Python 3.14.3**.
+3. Copy `.env.example` to `.env`.
+4. Install dependencies:
 
-### docs
-Architecture and design documentation.
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
 
-### scripts
-Utility scripts and developer tools.
+5. Add a PyCharm run configuration:
+   - **Run type:** Python module
+   - **Module name:** `uvicorn`
+   - **Parameters:** `app.main:app --reload --host 127.0.0.1 --port 8000`
+   - **Working directory:** `backend/`
 
----
+You can also run manually from the backend terminal:
 
-# Development Approach
+```bash
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
 
-The platform is built using **vertical modules** rather than isolated backend/frontend work.
+### Frontend (VS Code)
 
-Development order follows:
+1. Open the repo root or `frontend/` in **VS Code**.
+2. Copy `.env.example` to `.env`.
+3. Install dependencies and start the dev server:
 
-1. BackMarket inbound sync
-2. Device intake and barcode workflow
-3. Device lifecycle management
-4. Repairs and parts
-5. Inventory
-6. Sales and accounting
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
----
+The frontend expects the API at `http://127.0.0.1:8000` by default.
 
-# Documentation
+## IDE usage
 
-All architecture and planning documents are stored in:
+### PyCharm
 
+Use PyCharm only for `backend/`. Keep the interpreter pinned to the local `.venv` created from Python 3.14.3.
 
-docs/
+### VS Code
 
+Open `refurbops.code-workspace` from the repo root. It includes both backend and frontend folders, but the intended use is mainly frontend and general repo navigation.
 
-These include:
+## Current purpose of this scaffold
 
-- system blueprint
-- data model
-- workflow status model
-- inbound sync design
-- module implementation plan
+This is intentionally a clean base, not the full app. It is for:
 
----
+1. locking the repo structure
+2. locking the local environment
+3. getting PyCharm and VS Code working cleanly
+4. starting Module 01 from a stable base
 
-# Development Environment
+## Next implementation slice
 
-Local development:
+The first real slice remains:
 
-- backend runs locally
-- frontend runs locally
-- MongoDB runs locally
-
-Future production target:
-
-- cloud backend
-- cloud frontend
-- MongoDB Atlas
-- object storage for files
-
----
-
-
+Inbound page -> click Arrived -> create device -> generate `device_id` -> generate/print label -> open device record.
