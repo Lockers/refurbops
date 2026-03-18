@@ -55,3 +55,22 @@ python -m learning_scraper.cli \
 - `judgement.py`: accept / retry / reject rules, including network-aware checks
 - `runner.py`: workflow orchestration
 - `cli.py`: command-line entrypoint
+
+
+## Site-wide inventory
+
+The next killer feature is a site inventory crawler that can visit multiple internal pages, summarize script bundles, surface likely API endpoints, and flag likely bot-protection vendors such as Cloudflare or hCaptcha without attempting to bypass them.
+
+Example usage from Python:
+
+```python
+from learning_scraper import CrawlConfig, ScrapeConfig, SiteInventoryCrawler
+
+crawler = SiteInventoryCrawler()
+result = crawler.crawl(
+    CrawlConfig(seed_urls=("https://example.com",), max_pages=10, max_workers=4),
+    ScrapeConfig(url="https://example.com", fetch_mode="browser", min_text_length=1),
+)
+```
+
+This is useful for finding site-wide API entry points and JavaScript assets before deciding whether product-by-product scraping is necessary.

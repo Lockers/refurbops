@@ -13,10 +13,11 @@ from .models import ExtractionResult
 
 
 class _ReadableHTMLParser(HTMLParser):
-    """Extract a title, body text, and links from HTML.
+    """Extract a title, body text, links, and script URLs from HTML.
 
-    Script and style content is ignored so the resulting text is closer to what
-    a human evaluator would read.
+    Script and style bodies are ignored for readable text extraction, but script
+    `src` URLs are still captured because they are useful for site inventory and
+    understanding JavaScript-heavy applications.
     """
 
     def __init__(self, base_url: str) -> None:
@@ -27,18 +28,24 @@ class _ReadableHTMLParser(HTMLParser):
         self._title_parts: list[str] = []
         self._text_parts: list[str] = []
         self._links: list[str] = []
+        self._script_urls: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        """Track ignored tags and collect hyperlink targets."""
+        """Track ignored tags and collect link-like targets."""
 
+        attr_map = dict(attrs)
         if tag in {"script", "style", "noscript"}:
             self._skip_depth += 1
         if tag == "title":
             self._in_title = True
         if tag == "a":
-            href = dict(attrs).get("href")
+            href = attr_map.get("href")
             if href:
                 self._links.append(urljoin(self.base_url, href))
+        if tag == "script":
+            src = attr_map.get("src")
+            if src:
+                self._script_urls.append(urljoin(self.base_url, src))
 
     def handle_endtag(self, tag: str) -> None:
         """Reset parser state after closing tags."""
@@ -63,12 +70,17 @@ class _ReadableHTMLParser(HTMLParser):
         else:
             self._text_parts.append(cleaned)
 
-    def to_extraction_result(self) -> tuple[str, str, tuple[str, ...]]:
+    def to_extraction_result(self) -> tuple[str, str, tuple[str, ...], tuple[str, ...]]:
         """Build parser output after feeding the document."""
 
         title = " ".join(self._title_parts).strip()
         text = " ".join(self._text_parts).strip()
-        return title, text, tuple(dict.fromkeys(self._links))
+        return (
+            title,
+            text,
+            tuple(dict.fromkeys(self._links)),
+            tuple(dict.fromkeys(self._script_urls)),
+        )
 
 
 def extract_readable_content(url: str, html: str, meta: dict | None = None) -> ExtractionResult:
@@ -76,5 +88,8 @@ def extract_readable_content(url: str, html: str, meta: dict | None = None) -> E
 
     parser = _ReadableHTMLParser(base_url=url)
     parser.feed(html)
-    title, text, links = parser.to_extraction_result()
-    return ExtractionResult(url=url, title=title, text=text, links=links, meta=meta or {})
+    title, text, links, script_urls = parser.to_extraction_result()
+    enriched_meta = dict(meta or {})
+    enriched_meta.setdefault("script_urls", list(script_urls))
+    enriched_meta.setdefault("raw_html", html)
+    return ExtractionResult(url=url, title=title, text=text, links=links, meta=enriched_meta)

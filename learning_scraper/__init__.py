@@ -15,17 +15,22 @@ from .models import (
     ScrapeResult,
 )
 from .runner import LearningScraper
+from .site_inventory import CrawlConfig, PageInventory, SiteInventoryCrawler, SiteInventoryResult
 
 __all__ = [
+    "CrawlConfig",
     "ExtractionResult",
     "FetchResponse",
     "JudgementOutcome",
     "LearningScraper",
     "NetworkEvent",
+    "PageInventory",
     "PageJudge",
     "PageJudgement",
     "RetryPolicy",
     "RetryReason",
     "ScrapeConfig",
     "ScrapeResult",
+    "SiteInventoryCrawler",
+    "SiteInventoryResult",
 ]

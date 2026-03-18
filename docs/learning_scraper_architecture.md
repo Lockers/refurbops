@@ -59,3 +59,18 @@ Potential next steps include:
 - persistent crawl queues
 - structured extraction rules per domain
 - ML-based content classification
+
+
+## Site inventory mode
+
+A strong next-step capability is site-wide inventory crawling. The crawler can:
+
+- visit multiple internal pages concurrently
+- collect internal links for breadth-first exploration
+- inventory script bundles referenced by each page
+- surface likely API endpoints from observed network traffic and HTML entry points
+- flag likely challenge or bot-protection vendors for analyst review
+
+This supports the workflow of mapping a site first, then deciding whether a stable API or GraphQL endpoint can replace brittle page-by-page scraping.
+
+The implementation intentionally stops at detection and inventory. It does not attempt to extract secrets, defeat challenge systems, or automate CAPTCHA solving.

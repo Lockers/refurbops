@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from learning_scraper.models import FetchResponse, RetryPolicy, ScrapeConfig
 from learning_scraper.runner import LearningScraper
+from learning_scraper.site_inventory import CrawlConfig, SiteInventoryCrawler
 
 
 @dataclass(slots=True)
@@ -258,3 +259,67 @@ def test_scraper_accepts_browser_result_with_expected_network_call() -> None:
     assert result.extraction is not None
     assert result.extraction.meta["fetch_mode"] == "browser"
     assert result.extraction.meta["network_events"][0]["url"].endswith("/api/devices?page=1")
+
+
+def test_site_inventory_discovers_internal_links_apis_scripts_and_bot_signals() -> None:
+    """Site inventory should summarize multiple pages and detected signals."""
+
+    scraper = LearningScraper(
+        fetcher=FakeFetcher(
+            responses=[
+                FetchResponse(
+                    url="https://shop.example.com/",
+                    status_code=200,
+                    text=(
+                        '<html><head><title>Home</title><script src="/static/app.js"></script></head>'
+                        '<body><a href="/products">Products</a><p>Cloudflare protected catalog home.</p>'
+                        '<script>window.apiRoot="/api/catalog";</script></body></html>'
+                    ),
+                    metadata={
+                        "fetch_mode": "browser",
+                        "network_events": [
+                            {
+                                "url": "https://shop.example.com/api/catalog?page=1",
+                                "method": "GET",
+                                "resource_type": "fetch",
+                                "status_code": 200,
+                                "failure_text": None,
+                            }
+                        ],
+                    },
+                ),
+                FetchResponse(
+                    url="https://shop.example.com/products",
+                    status_code=200,
+                    text=(
+                        '<html><head><title>Products</title><script src="/static/products.js"></script></head>'
+                        '<body><a href="/product/1">One</a><p>Product listing page.</p></body></html>'
+                    ),
+                    metadata={
+                        "fetch_mode": "browser",
+                        "network_events": [
+                            {
+                                "url": "https://shop.example.com/graphql",
+                                "method": "POST",
+                                "resource_type": "fetch",
+                                "status_code": 200,
+                                "failure_text": None,
+                            }
+                        ],
+                    },
+                ),
+            ]
+        )
+    )
+    crawler = SiteInventoryCrawler(scraper=scraper)
+    result = crawler.crawl(
+        CrawlConfig(seed_urls=("https://shop.example.com/",), max_pages=2, max_workers=2),
+        ScrapeConfig(url="https://shop.example.com/", fetch_mode="browser", min_text_length=1),
+    )
+
+    assert len(result.pages) == 2
+    assert "https://shop.example.com/api/catalog?page=1" in result.discovered_api_candidates
+    assert "https://shop.example.com/graphql" in result.discovered_api_candidates
+    assert "https://shop.example.com/static/app.js" in result.discovered_script_urls
+    assert "cloudflare" in result.detected_bot_protection
+    assert result.pages[0].internal_links == ("https://shop.example.com/products",)

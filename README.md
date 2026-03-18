@@ -98,4 +98,4 @@ Inbound page -> click Arrived -> create device -> generate `device_id` -> genera
 
 ## Standalone learning scraper
 
-This repository also includes a standalone `learning_scraper/` package that demonstrates HTTP and browser-backed scrape -> judge -> retry workflows for educational use, including JavaScript rendering and network-call-aware judgement. See `learning_scraper/README.md` and `docs/learning_scraper_architecture.md` for details.
+This repository also includes a standalone `learning_scraper/` package that demonstrates HTTP and browser-backed scrape -> judge -> retry workflows for educational use, including JavaScript rendering, network-call-aware judgement, and site-wide inventory crawling. See `learning_scraper/README.md` and `docs/learning_scraper_architecture.md` for details.
