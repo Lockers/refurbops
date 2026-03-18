@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from "react"
 import { appRoutes, navigateTo } from "../../routes"
-import { fetchHealth } from "../../services/api/client"
+import { fetchApiRoot, fetchHealth } from "../../services/api/client"
 import { useBusiness } from "../providers/useBusiness"
 
 interface AppShellProps {
@@ -15,6 +15,8 @@ export function AppShell({ currentPath, children }: AppShellProps) {
   const { businessId, setBusinessId } = useBusiness()
   const [draftBusinessId, setDraftBusinessId] = useState(businessId)
   const [healthStatus, setHealthStatus] = useState("checking")
+  const [apiEnvironment, setApiEnvironment] = useState("unknown")
+  const [apiName, setApiName] = useState("refurbops-backend")
 
   useEffect(() => {
     setDraftBusinessId(businessId)
@@ -23,14 +25,16 @@ export function AppShell({ currentPath, children }: AppShellProps) {
   useEffect(() => {
     let active = true
 
-    async function loadHealth() {
+    async function loadShellMetadata() {
       try {
-        const health = await fetchHealth()
+        const [health, root] = await Promise.all([fetchHealth(), fetchApiRoot()])
         if (!active) {
           return
         }
 
         setHealthStatus(health.database === "ok" ? "healthy" : "degraded")
+        setApiEnvironment(root.environment)
+        setApiName(root.name)
       } catch {
         if (!active) {
           return
@@ -40,7 +44,7 @@ export function AppShell({ currentPath, children }: AppShellProps) {
       }
     }
 
-    loadHealth()
+    loadShellMetadata()
 
     return () => {
       active = false
@@ -53,7 +57,7 @@ export function AppShell({ currentPath, children }: AppShellProps) {
         <div className="brand-block">
           <p className="eyebrow">RefurbOps</p>
           <h1>Operations Console</h1>
-          <p className="muted-text">Inbound-first workflow aligned to the current backend slice.</p>
+          <p className="muted-text">{apiName} · {apiEnvironment}</p>
         </div>
 
         <nav className="app-nav" aria-label="Primary navigation">

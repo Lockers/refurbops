@@ -111,6 +111,17 @@ export default function InboundDetailPage({ inboundId }: InboundDetailPageProps)
         </article>
 
         <article className="card">
+          <h2>Return address</h2>
+          <dl className="key-values">
+            <div><dt>Address 1</dt><dd>{order.return_address.address1 || "—"}</dd></div>
+            <div><dt>Address 2</dt><dd>{order.return_address.address2 || "—"}</dd></div>
+            <div><dt>City</dt><dd>{order.return_address.city || "—"}</dd></div>
+            <div><dt>Postcode</dt><dd>{order.return_address.zipcode || "—"}</dd></div>
+            <div><dt>Country</dt><dd>{order.return_address.country || "—"}</dd></div>
+          </dl>
+        </article>
+
+        <article className="card">
           <h2>Tracking</h2>
           <dl className="key-values">
             <div><dt>Shipper</dt><dd>{order.tracking.shipper || "—"}</dd></div>
@@ -139,6 +150,21 @@ export default function InboundDetailPage({ inboundId }: InboundDetailPageProps)
             <div><dt>Archived</dt><dd>{String(order.local_state.archived)}</dd></div>
           </dl>
         </article>
+
+        <article className="card">
+          <h2>Suspend reasons</h2>
+          <pre className="json-block">{formatJson(order.suspend_reasons)}</pre>
+        </article>
+
+        <article className="card">
+          <h2>Counter-offer reasons</h2>
+          <pre className="json-block">{formatJson(order.counter_offer_reasons)}</pre>
+        </article>
+
+        <article className="card card-span-full">
+          <h2>Raw payload</h2>
+          <pre className="json-block">{formatJson(order.raw_payload)}</pre>
+        </article>
       </div>
     </PageShell>
   )
@@ -158,4 +184,8 @@ function formatMoney(value?: number | null, currency?: string | null) {
   }
 
   return `${value} ${currency || ""}`.trim()
+}
+
+function formatJson(value: unknown) {
+  return JSON.stringify(value, null, 2)
 }

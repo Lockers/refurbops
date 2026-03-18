@@ -323,6 +323,32 @@ select {
   border-color: #bfdbfe;
 }
 
+
+.stack-block {
+  display: grid;
+  gap: 12px;
+}
+
+.retry-panel {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.json-block {
+  margin: 0;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 0.8rem;
+}
+
+.card-span-full {
+  grid-column: 1 / -1;
+}
+
 .setup-hero {
   margin-bottom: 24px;
 }

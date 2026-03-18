@@ -66,7 +66,7 @@ export interface InboundQueueRow {
   arrived_clicked: boolean
   device_created: boolean
   linked_device_id?: string | null
-  hidden_from_inbound?: boolean
+  hidden_from_inbound: boolean
   last_synced_at?: string | null
 }
 

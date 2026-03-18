@@ -138,7 +138,7 @@ export default function SetupPage({ onComplete }: SetupPageProps) {
           <label style={labelStyle}>
             VAT Scheme
             <input
-              value={form.business.vat_scheme}
+              value={form.business.vat_scheme ?? ""}
               onChange={(event) => updateBusinessField("vat_scheme", event.target.value)}
               style={inputStyle}
             />
@@ -147,7 +147,7 @@ export default function SetupPage({ onComplete }: SetupPageProps) {
           <label style={labelStyle}>
             VAT Period
             <input
-              value={form.business.vat_period}
+              value={form.business.vat_period ?? ""}
               onChange={(event) => updateBusinessField("vat_period", event.target.value)}
               style={inputStyle}
             />
@@ -156,7 +156,7 @@ export default function SetupPage({ onComplete }: SetupPageProps) {
           <label style={labelStyle}>
             VAT Period Start
             <input
-              value={form.business.vat_period_start}
+              value={form.business.vat_period_start ?? ""}
               onChange={(event) => updateBusinessField("vat_period_start", event.target.value)}
               style={inputStyle}
             />

@@ -5,7 +5,7 @@ import { EmptyState } from "../components/ui/EmptyState"
 import { ErrorState } from "../components/ui/ErrorState"
 import { LoadingState } from "../components/ui/LoadingState"
 import { useBusiness } from "../app/providers/useBusiness"
-import { getApiErrorMessage } from "../services/api/client"
+import { getApiErrorInfo, getApiErrorMessage } from "../services/api/client"
 import { fetchInbound, syncInbound } from "../services/inboundApi"
 import { InboundQueryParams, InboundQueueRow, InboundSyncResult } from "../types/inbound"
 import { navigateTo } from "../routes"
@@ -22,6 +22,7 @@ export default function InboundPage() {
   const [loading, setLoading] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [error, setError] = useState("")
+  const [retryAfterSeconds, setRetryAfterSeconds] = useState<number | undefined>(undefined)
   const [syncResult, setSyncResult] = useState<InboundSyncResult | null>(null)
   const [filters, setFilters] = useState({
     externalStatus: "",
@@ -60,6 +61,7 @@ export default function InboundPage() {
     async function loadInboundQueue() {
       setLoading(true)
       setError("")
+      setRetryAfterSeconds(undefined)
 
       try {
         const result = await fetchInbound(query)
@@ -92,6 +94,7 @@ export default function InboundPage() {
   async function handleSync() {
     setSyncing(true)
     setError("")
+    setRetryAfterSeconds(undefined)
 
     try {
       const result = await syncInbound(businessId)
@@ -101,7 +104,9 @@ export default function InboundPage() {
       setRows(refreshed.items)
       setTotal(refreshed.total)
     } catch (syncError) {
-      setError(getApiErrorMessage(syncError, "Failed to sync inbound orders."))
+      const apiError = getApiErrorInfo(syncError, "Failed to sync inbound orders.")
+      setError(apiError.message)
+      setRetryAfterSeconds(apiError.retryAfterSeconds)
     } finally {
       setSyncing(false)
     }
@@ -219,7 +224,14 @@ export default function InboundPage() {
         </div>
       ) : null}
 
-      {error ? <ErrorState message={error} actionLabel="Reload" onAction={() => window.location.reload()} /> : null}
+      {error ? (
+        <div className="stack-block">
+          <ErrorState message={error} actionLabel="Reload" onAction={() => window.location.reload()} />
+          {typeof retryAfterSeconds === "number" ? (
+            <div className="state-panel retry-panel">Retry after {retryAfterSeconds} seconds.</div>
+          ) : null}
+        </div>
+      ) : null}
 
       {loading ? (
         <LoadingState message="Loading inbound queue..." />
