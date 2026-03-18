@@ -71,10 +71,10 @@ class _ReadableHTMLParser(HTMLParser):
         return title, text, tuple(dict.fromkeys(self._links))
 
 
-def extract_readable_content(url: str, html: str) -> ExtractionResult:
+def extract_readable_content(url: str, html: str, meta: dict | None = None) -> ExtractionResult:
     """Convert an HTML document into a normalized extraction result."""
 
     parser = _ReadableHTMLParser(base_url=url)
     parser.feed(html)
     title, text, links = parser.to_extraction_result()
-    return ExtractionResult(url=url, title=title, text=text, links=links)
+    return ExtractionResult(url=url, title=title, text=text, links=links, meta=meta or {})

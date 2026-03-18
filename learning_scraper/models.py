@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
+
+
+FetchMode = Literal["http", "browser"]
+WaitUntil = Literal["commit", "domcontentloaded", "load", "networkidle"]
 
 
 @dataclass(slots=True)
@@ -25,8 +29,9 @@ class RetryPolicy:
 class ScrapeConfig:
     """User-facing configuration for a scrape run.
 
-    The keyword rules are intentionally simple so the scraper is easy to extend
-    while still demonstrating how to make content quality judgements.
+    The browser-related fields are optional so the learning project can start in
+    plain HTTP mode and graduate to full browser rendering when a target site
+    depends on JavaScript or background network activity.
     """
 
     url: str
@@ -41,6 +46,24 @@ class ScrapeConfig:
     retry_policy: RetryPolicy = field(default_factory=RetryPolicy)
     timeout_seconds: float = 10.0
     user_agent: str = "LearningScraper/1.0"
+    fetch_mode: FetchMode = "http"
+    wait_until: WaitUntil = "networkidle"
+    wait_for_selector: str | None = None
+    post_load_delay_seconds: float = 0.0
+    browser_headless: bool = True
+    required_network_patterns: tuple[str, ...] = ()
+    max_failed_network_calls: int = 0
+
+
+@dataclass(slots=True)
+class NetworkEvent:
+    """Observed browser network activity for a single request/response cycle."""
+
+    url: str
+    method: str
+    resource_type: str
+    status_code: int | None = None
+    failure_text: str | None = None
 
 
 @dataclass(slots=True)
@@ -62,6 +85,18 @@ class ScrapeAttempt:
     status_code: int | None
     decision: str
     reason: str
+
+
+@dataclass(slots=True)
+class FetchResponse:
+    """Normalized response returned by any fetch implementation."""
+
+    url: str
+    status_code: int
+    text: str
+    fetch_mode: FetchMode = "http"
+    network_events: tuple[NetworkEvent, ...] = ()
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)

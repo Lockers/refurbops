@@ -23,6 +23,8 @@ class RetryReason(str, Enum):
     MISSING_KEYWORDS = "missing_keywords"
     FORBIDDEN_CONTENT = "forbidden_content"
     EMPTY_DOCUMENT = "empty_document"
+    MISSING_NETWORK_CALLS = "missing_network_calls"
+    TOO_MANY_FAILED_NETWORK_CALLS = "too_many_failed_network_calls"
     ACCEPTED = "accepted"
 
 
@@ -43,6 +45,34 @@ class PageJudge:
 
         text = extraction.text.strip()
         normalized_text = text.lower()
+        network_events = extraction.meta.get("network_events", [])
+
+        if config.required_network_patterns:
+            missing_patterns = [
+                pattern
+                for pattern in config.required_network_patterns
+                if not any(pattern.lower() in event.get("url", "").lower() for event in network_events)
+            ]
+            if missing_patterns:
+                return PageJudgement(
+                    outcome=JudgementOutcome.RETRY,
+                    reason=RetryReason.MISSING_NETWORK_CALLS,
+                    message=(
+                        "Missing required network patterns: "
+                        f"{', '.join(missing_patterns)}."
+                    ),
+                )
+
+        failed_network_calls = [event for event in network_events if event.get("failure_text")]
+        if len(failed_network_calls) > config.max_failed_network_calls:
+            return PageJudgement(
+                outcome=JudgementOutcome.RETRY,
+                reason=RetryReason.TOO_MANY_FAILED_NETWORK_CALLS,
+                message=(
+                    "Observed too many failed network calls: "
+                    f"{len(failed_network_calls)} > {config.max_failed_network_calls}."
+                ),
+            )
 
         if not normalized_text:
             return PageJudgement(

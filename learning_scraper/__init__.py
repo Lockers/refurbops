@@ -6,13 +6,22 @@ when the page looks incomplete or blocked.
 """
 
 from .judgement import JudgementOutcome, PageJudgement, PageJudge, RetryReason
-from .models import ExtractionResult, RetryPolicy, ScrapeConfig, ScrapeResult
+from .models import (
+    ExtractionResult,
+    FetchResponse,
+    NetworkEvent,
+    RetryPolicy,
+    ScrapeConfig,
+    ScrapeResult,
+)
 from .runner import LearningScraper
 
 __all__ = [
     "ExtractionResult",
+    "FetchResponse",
     "JudgementOutcome",
     "LearningScraper",
+    "NetworkEvent",
     "PageJudge",
     "PageJudgement",
     "RetryPolicy",

@@ -2,20 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from .models import ScrapeConfig
-
-
-@dataclass(slots=True)
-class FetchResponse:
-    """Normalized HTTP response returned by the fetcher."""
-
-    url: str
-    status_code: int
-    text: str
+from .models import FetchResponse, ScrapeConfig
 
 
 class PageFetcher:
@@ -34,9 +24,21 @@ class PageFetcher:
                 body = response.read().decode("utf-8", errors="replace")
                 status_code = getattr(response, "status", None) or 200
                 final_url = response.geturl()
-                return FetchResponse(url=final_url, status_code=status_code, text=body)
+                return FetchResponse(
+                    url=final_url,
+                    status_code=status_code,
+                    text=body,
+                    fetch_mode="http",
+                    metadata={"fetch_mode": "http", "network_events": []},
+                )
         except HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")
-            return FetchResponse(url=exc.geturl(), status_code=exc.code, text=body)
+            return FetchResponse(
+                url=exc.geturl(),
+                status_code=exc.code,
+                text=body,
+                fetch_mode="http",
+                metadata={"fetch_mode": "http", "network_events": []},
+            )
         except URLError as exc:
             raise ConnectionError(str(exc)) from exc
