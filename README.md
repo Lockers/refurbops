@@ -95,3 +95,7 @@ This is intentionally a clean base, not the full app. It is for:
 The first real slice remains:
 
 Inbound page -> click Arrived -> create device -> generate `device_id` -> generate/print label -> open device record.
+
+## Standalone learning scraper
+
+This repository also includes a standalone `learning_scraper/` package that demonstrates a scrape -> judge -> retry workflow for educational use. See `learning_scraper/README.md` and `docs/learning_scraper_architecture.md` for details.
