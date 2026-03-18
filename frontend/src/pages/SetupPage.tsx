@@ -1,12 +1,17 @@
-import { FormEvent, useState } from "react"
+import type { CSSProperties, FormEvent } from "react"
+import { useState } from "react"
 import { bootstrapSystem } from "../services/setupApi"
+import { getApiErrorMessage } from "../services/api/client"
 import { SetupBootstrapRequest } from "../types/setup"
 
-interface Props {
-  onComplete: () => void
+interface SetupPageProps {
+  onComplete: (businessId: string) => void
 }
 
-export default function SetupPage({ onComplete }: Props) {
+/**
+ * Render the first-time bootstrap form for the initial business and admin user.
+ */
+export default function SetupPage({ onComplete }: SetupPageProps) {
   const [form, setForm] = useState<SetupBootstrapRequest>({
     business: {
       _id: "biz_001",
@@ -34,17 +39,17 @@ export default function SetupPage({ onComplete }: Props) {
   })
 
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string>("")
-  const [success, setSuccess] = useState<string>("")
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
 
   function updateBusinessField<K extends keyof SetupBootstrapRequest["business"]>(
     key: K,
     value: SetupBootstrapRequest["business"][K]
   ) {
-    setForm((prev) => ({
-      ...prev,
+    setForm((previousForm) => ({
+      ...previousForm,
       business: {
-        ...prev.business,
+        ...previousForm.business,
         [key]: value,
       },
     }))
@@ -56,12 +61,12 @@ export default function SetupPage({ onComplete }: Props) {
     key: K,
     value: SetupBootstrapRequest["business"]["backmarket"][K]
   ) {
-    setForm((prev) => ({
-      ...prev,
+    setForm((previousForm) => ({
+      ...previousForm,
       business: {
-        ...prev.business,
+        ...previousForm.business,
         backmarket: {
-          ...prev.business.backmarket,
+          ...previousForm.business.backmarket,
           [key]: value,
         },
       },
@@ -72,10 +77,10 @@ export default function SetupPage({ onComplete }: Props) {
     key: K,
     value: SetupBootstrapRequest["user"][K]
   ) {
-    setForm((prev) => ({
-      ...prev,
+    setForm((previousForm) => ({
+      ...previousForm,
       user: {
-        ...prev.user,
+        ...previousForm.user,
         [key]: value,
       },
     }))
@@ -88,11 +93,11 @@ export default function SetupPage({ onComplete }: Props) {
     setSuccess("")
 
     try {
-      await bootstrapSystem(form)
+      const response = await bootstrapSystem(form)
       setSuccess("Setup completed successfully.")
-      onComplete()
-    } catch (err: any) {
-      setError(err?.response?.data?.detail || "Setup failed.")
+      onComplete(response.business_id)
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError, "Setup failed."))
     } finally {
       setSubmitting(false)
     }
@@ -100,8 +105,13 @@ export default function SetupPage({ onComplete }: Props) {
 
   return (
     <div style={containerStyle}>
-      <h1>RefurbOps Setup</h1>
-      <p>Create the first business and admin user.</p>
+      <div className="setup-hero">
+        <p className="eyebrow">Platform bootstrap</p>
+        <h1>Configure RefurbOps</h1>
+        <p className="muted-text">
+          Create the first business and admin user, then continue directly into the inbound queue.
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} style={formStyle}>
         <section style={sectionStyle}>
@@ -111,7 +121,7 @@ export default function SetupPage({ onComplete }: Props) {
             Business ID
             <input
               value={form.business._id}
-              onChange={(e) => updateBusinessField("_id", e.target.value)}
+              onChange={(event) => updateBusinessField("_id", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -120,7 +130,7 @@ export default function SetupPage({ onComplete }: Props) {
             Business Name
             <input
               value={form.business.name}
-              onChange={(e) => updateBusinessField("name", e.target.value)}
+              onChange={(event) => updateBusinessField("name", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -128,8 +138,8 @@ export default function SetupPage({ onComplete }: Props) {
           <label style={labelStyle}>
             VAT Scheme
             <input
-              value={form.business.vat_scheme}
-              onChange={(e) => updateBusinessField("vat_scheme", e.target.value)}
+              value={form.business.vat_scheme ?? ""}
+              onChange={(event) => updateBusinessField("vat_scheme", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -137,8 +147,8 @@ export default function SetupPage({ onComplete }: Props) {
           <label style={labelStyle}>
             VAT Period
             <input
-              value={form.business.vat_period}
-              onChange={(e) => updateBusinessField("vat_period", e.target.value)}
+              value={form.business.vat_period ?? ""}
+              onChange={(event) => updateBusinessField("vat_period", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -146,8 +156,8 @@ export default function SetupPage({ onComplete }: Props) {
           <label style={labelStyle}>
             VAT Period Start
             <input
-              value={form.business.vat_period_start}
-              onChange={(e) => updateBusinessField("vat_period_start", e.target.value)}
+              value={form.business.vat_period_start ?? ""}
+              onChange={(event) => updateBusinessField("vat_period_start", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -160,7 +170,7 @@ export default function SetupPage({ onComplete }: Props) {
             API Key
             <input
               value={form.business.backmarket.api_key}
-              onChange={(e) => updateBackMarketField("api_key", e.target.value)}
+              onChange={(event) => updateBackMarketField("api_key", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -169,7 +179,7 @@ export default function SetupPage({ onComplete }: Props) {
             Accept Language
             <input
               value={form.business.backmarket.accept_language}
-              onChange={(e) => updateBackMarketField("accept_language", e.target.value)}
+              onChange={(event) => updateBackMarketField("accept_language", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -178,7 +188,7 @@ export default function SetupPage({ onComplete }: Props) {
             Company Name
             <input
               value={form.business.backmarket.company_name}
-              onChange={(e) => updateBackMarketField("company_name", e.target.value)}
+              onChange={(event) => updateBackMarketField("company_name", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -187,7 +197,7 @@ export default function SetupPage({ onComplete }: Props) {
             Integration Name
             <input
               value={form.business.backmarket.integration_name}
-              onChange={(e) => updateBackMarketField("integration_name", e.target.value)}
+              onChange={(event) => updateBackMarketField("integration_name", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -196,7 +206,7 @@ export default function SetupPage({ onComplete }: Props) {
             Contact Email
             <input
               value={form.business.backmarket.contact_email}
-              onChange={(e) => updateBackMarketField("contact_email", e.target.value)}
+              onChange={(event) => updateBackMarketField("contact_email", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -205,7 +215,7 @@ export default function SetupPage({ onComplete }: Props) {
             Proxy URL
             <input
               value={form.business.backmarket.proxy_url}
-              onChange={(e) => updateBackMarketField("proxy_url", e.target.value)}
+              onChange={(event) => updateBackMarketField("proxy_url", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -218,7 +228,7 @@ export default function SetupPage({ onComplete }: Props) {
             User ID
             <input
               value={form.user._id}
-              onChange={(e) => updateUserField("_id", e.target.value)}
+              onChange={(event) => updateUserField("_id", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -227,7 +237,7 @@ export default function SetupPage({ onComplete }: Props) {
             Name
             <input
               value={form.user.name}
-              onChange={(e) => updateUserField("name", e.target.value)}
+              onChange={(event) => updateUserField("name", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -236,7 +246,7 @@ export default function SetupPage({ onComplete }: Props) {
             Email
             <input
               value={form.user.email}
-              onChange={(e) => updateUserField("email", e.target.value)}
+              onChange={(event) => updateUserField("email", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -245,7 +255,7 @@ export default function SetupPage({ onComplete }: Props) {
             Role
             <input
               value={form.user.role}
-              onChange={(e) => updateUserField("role", e.target.value)}
+              onChange={(event) => updateUserField("role", event.target.value)}
               style={inputStyle}
             />
           </label>
@@ -255,46 +265,47 @@ export default function SetupPage({ onComplete }: Props) {
         {success ? <div style={successStyle}>{success}</div> : null}
 
         <button type="submit" disabled={submitting} style={buttonStyle}>
-          {submitting ? "Saving..." : "Create Business and User"}
+          {submitting ? "Saving..." : "Create business and user"}
         </button>
       </form>
     </div>
   )
 }
 
-const containerStyle: React.CSSProperties = {
-  maxWidth: 900,
+const containerStyle: CSSProperties = {
+  maxWidth: 1120,
   margin: "40px auto",
   padding: 24,
 }
 
-const formStyle: React.CSSProperties = {
+const formStyle: CSSProperties = {
   display: "grid",
   gap: 24,
 }
 
-const sectionStyle: React.CSSProperties = {
+const sectionStyle: CSSProperties = {
   padding: 20,
-  border: "1px solid #ddd",
-  borderRadius: 12,
-  background: "#fff",
+  border: "1px solid #dbe3f0",
+  borderRadius: 16,
+  background: "#ffffff",
   display: "grid",
   gap: 12,
+  boxShadow: "0 12px 28px rgba(15, 23, 42, 0.06)",
 }
 
-const labelStyle: React.CSSProperties = {
+const labelStyle: CSSProperties = {
   display: "grid",
   gap: 6,
   fontWeight: 500,
 }
 
-const inputStyle: React.CSSProperties = {
+const inputStyle: CSSProperties = {
   padding: 10,
-  borderRadius: 8,
-  border: "1px solid #ccc",
+  borderRadius: 10,
+  border: "1px solid #cbd5e1",
 }
 
-const buttonStyle: React.CSSProperties = {
+const buttonStyle: CSSProperties = {
   padding: "12px 16px",
   borderRadius: 10,
   border: "none",
@@ -303,16 +314,16 @@ const buttonStyle: React.CSSProperties = {
   cursor: "pointer",
 }
 
-const errorStyle: React.CSSProperties = {
+const errorStyle: CSSProperties = {
   padding: 12,
-  borderRadius: 8,
+  borderRadius: 10,
   background: "#fee2e2",
   color: "#991b1b",
 }
 
-const successStyle: React.CSSProperties = {
+const successStyle: CSSProperties = {
   padding: 12,
-  borderRadius: 8,
+  borderRadius: 10,
   background: "#dcfce7",
   color: "#166534",
 }

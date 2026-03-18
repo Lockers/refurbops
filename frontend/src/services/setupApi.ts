@@ -1,20 +1,24 @@
-import axios from "axios"
+import { apiClient } from "./api/client"
 import {
   SetupBootstrapRequest,
   SetupBootstrapResponse,
   SetupStatusResponse,
 } from "../types/setup"
 
-const API = import.meta.env.VITE_API_BASE_URL
-
+/**
+ * Fetch whether first-time platform bootstrap has already completed.
+ */
 export async function fetchSetupStatus(): Promise<SetupStatusResponse> {
-  const res = await axios.get(`${API}/api/setup/status`)
-  return res.data
+  const response = await apiClient.get<SetupStatusResponse>("/api/setup/status")
+  return response.data
 }
 
+/**
+ * Bootstrap the first business and admin user.
+ */
 export async function bootstrapSystem(
   payload: SetupBootstrapRequest
 ): Promise<SetupBootstrapResponse> {
-  const res = await axios.post(`${API}/api/setup/bootstrap`, payload)
-  return res.data
+  const response = await apiClient.post<SetupBootstrapResponse>("/api/setup/bootstrap", payload)
+  return response.data
 }

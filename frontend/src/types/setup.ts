@@ -16,9 +16,9 @@ export interface SetupBusinessPayload {
   _id: string
   name: string
   vat_registered: boolean
-  vat_scheme: string
-  vat_period: string
-  vat_period_start: string
+  vat_scheme?: string | null
+  vat_period?: string | null
+  vat_period_start?: string | null
   backmarket: BackMarketSetupConfig
 }
 
