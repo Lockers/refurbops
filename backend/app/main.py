@@ -1,80 +1,54 @@
-from __future__ import annotations
-
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.api.inbound_router import router as inbound_router
-from app.api.routers.health import router as health_router
-from app.core.config import get_settings
-from app.core.database import close_client, get_database
-from app.repositories.inbound_order_repository import InboundOrderRepository
-from app.repositories.sync_state_repository import SyncStateRepository
-from app.api.setup_router import router as setup_router
-from app.repositories.business_repository import BusinessRepository
-from app.repositories.user_repository import UserRepository
-
-settings = get_settings()
+from app.api.middleware.correlation_id import CorrelationIdMiddleware
+from app.api.router import api_router
+from app.bootstrap.platform_owner import ensure_platform_owner_seeded
+from app.config import get_settings
+from app.db.indexes import ensure_indexes
+from app.db.mongo import close_client, get_database
+from app.db.redis import close_redis, get_redis
+from app.logging import configure_logging
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):
-    """
-    Application startup and shutdown lifecycle.
+async def lifespan(app: FastAPI):
+    settings = get_settings()
+    configure_logging(settings=settings)
 
-    Startup responsibilities:
-    - Ensure MongoDB indexes required for inbound sync exist.
+    database = await get_database()
+    app.state.mongo_db = database
+    await ensure_indexes(database)
+    await ensure_platform_owner_seeded(database=database, settings=settings)
 
-    Shutdown responsibilities:
-    - Close the shared Motor client cleanly.
-    """
-    database: AsyncIOMotorDatabase = get_database()
-
-    business_repo = BusinessRepository(database)
-    user_repo = UserRepository(database)
-    inbound_repo = InboundOrderRepository(database)
-    sync_state_repo = SyncStateRepository(database)
-
-    await business_repo.ensure_indexes()
-    await user_repo.ensure_indexes()
-    await inbound_repo.ensure_indexes()
-    await sync_state_repo.ensure_indexes()
+    redis = await get_redis()
+    app.state.redis = redis
 
     yield
 
+    await close_redis()
     await close_client()
 
 
-api = FastAPI(
-    title="RefurbOps API",
-    version="0.1.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    lifespan=lifespan,
-)
-
-api.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-api.include_router(health_router)
-api.include_router(inbound_router, prefix="/api/inbound", tags=["Inbound"])
-api.include_router(setup_router, prefix="/api/setup", tags=["Setup"])
+def create_app() -> FastAPI:
+    settings = get_settings()
+    app = FastAPI(
+        title=settings.app_name,
+        debug=settings.app_debug,
+        lifespan=lifespan,
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.frontend_origin],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    app.add_middleware(CorrelationIdMiddleware)
+    app.include_router(api_router, prefix="/api")
+    return app
 
 
-@api.get("/")
-async def root() -> dict[str, str]:
-    """
-    Root endpoint returning basic API metadata.
-    """
-    return {
-        "name": "refurbops-backend",
-        "environment": settings.app_env,
-        "status": "ready",
-    }
+app = create_app()

@@ -1,0 +1,73 @@
+/* RefurbOps — Global Styles */
+
+/* Page entrance animation */
+#root {
+  animation: root-fade-in 300ms ease-out;
+}
+
+@keyframes root-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Antialiased text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus-visible ring using brand color */
+*:focus-visible {
+  outline: 2px solid #1d63ed;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Card hover lift — applied to Mantine Card and Paper with data-hoverable */
+.mantine-Paper-root[data-hoverable],
+.mantine-Card-root {
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+
+.mantine-Paper-root[data-hoverable]:hover,
+.mantine-Card-root:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+}
+
+/* Dark mode card hover */
+[data-mantine-color-scheme='dark'] .mantine-Paper-root[data-hoverable]:hover,
+[data-mantine-color-scheme='dark'] .mantine-Card-root:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+/* Button press feedback */
+.mantine-Button-root:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* ActionIcon press feedback */
+.mantine-ActionIcon-root:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(29, 99, 237, 0.18);
+}
+
+/* Scrollbar styling for ScrollArea */
+.mantine-ScrollArea-root {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(87, 105, 129, 0.25) transparent;
+}
+
+/* Dark mode scrollbar */
+[data-mantine-color-scheme='dark'] .mantine-ScrollArea-root {
+  scrollbar-color: rgba(255, 255, 255, 0.20) transparent;
+}
